@@ -1,11 +1,14 @@
 class CcMap extends HTMLElement {
     constructor() {
         super();       
+        // store shadow root reference in a _root variable
+        this._root = this.attachShadow({ mode: 'open' }); 
+        console.log('this._root',this._root);
     }
     
     connectedCallback() {
         console.log('cc-map added to the DOM');
-        this.innerHTML = `
+        this._root.innerHTML = `
         <style>
         #map {
             height: 400px;
@@ -15,7 +18,7 @@ class CcMap extends HTMLElement {
         <div id="map">
         </div>
         `;
-        this._mapDiv = document.getElementById('map');        
+        this._mapDiv = this._root.getElementById('map');        
         this._render();
     }
 
