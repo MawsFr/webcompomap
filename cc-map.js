@@ -36,13 +36,13 @@ class CcMap extends HTMLElement {
             return;
         }
        
-        this._initMap(this.rennes, 12);
+        this._initMap({ center: this.rennes, zoom: 12});
     }
 
-    _initMap(center, zoom) {
+    _initMap(options) {
         var map = new window.google.maps.Map(this._mapDiv, {
-            zoom: zoom,
-            center: center
+            zoom: options.zoom,
+            center: options.center
         });
     }
 
@@ -55,7 +55,11 @@ class CcMap extends HTMLElement {
 
         console.log(`name: ${name} - old value: ${oldValue} - new value: ${newValue}`);
         if(name === 'zoom') {            
-            this._initMap(this.rennes, parseInt(newValue));
+            const mapOptions = {
+                zoom: parseInt(newValue),
+                center: this.rennes
+            };
+            this._initMap(mapOptions);
         }
     }
 
