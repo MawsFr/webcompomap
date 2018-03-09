@@ -40,5 +40,14 @@ class CcMap extends HTMLElement {
             center: center
         });
     }
+
+    static get observedAttributes() {
+        return ['zoom'];
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        console.log(`name: ${name} - old value: ${oldValue} - new value: ${newValue}`);
+    }
+
 } // end class
 window.customElements.define('cc-map', CcMap);
