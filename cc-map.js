@@ -11,9 +11,11 @@ class CcMap extends HTMLElement {
                 lat: 48.1173,
                 lng: -1.6778
             },
-            title: 'Rennes'
+            title: 'Rennes',
+            zoom: this._zoom
         };
         this._componentReady = false;
+        this._zoom = 12;
     }
     
     connectedCallback() {
@@ -75,6 +77,17 @@ class CcMap extends HTMLElement {
 
     get geoData() {
         return this._geoData;
+    }
+
+    set zoom(value) {
+        if(this._zoom === value) return;
+        this._zoom = value;
+        this._geoData.zoom = this._zoom;
+        this._initMap(this._geoData);
+    }
+
+    get zoom() {
+        return this._zoom;
     }
 
 } // end class
