@@ -6,9 +6,12 @@ class CcMap extends HTMLElement {
         console.log('this._root',this._root);
 
         // data
-        this.rennes = {
-            lat: 48.1173,
-            lng: -1.6778
+        this._geoData = {
+            center:  {
+                lat: 48.1173,
+                lng: -1.6778
+            },
+            title: 'Rennes'
         };
         this._componentReady = false;
     }
@@ -36,7 +39,7 @@ class CcMap extends HTMLElement {
             return;
         }
        
-        this._initMap({ center: this.rennes, zoom: 12});
+        this._initMap({ center: this._geoData.center, zoom: 12});
     }
 
     _initMap(options) {
@@ -57,10 +60,21 @@ class CcMap extends HTMLElement {
         if(name === 'zoom') {            
             const mapOptions = {
                 zoom: parseInt(newValue),
-                center: this.rennes
+                center: this._geoData.center
             };
             this._initMap(mapOptions);
         }
+    }
+
+    // getter and setter that will allow to programmatically get and set coords and map title
+    set geoData(value) {
+        if(this._geoData === value) return;
+        this._geoData = value;
+        this._initMap(this._geoData);
+    }
+
+    get geoData() {
+        return this._geoData;
     }
 
 } // end class
