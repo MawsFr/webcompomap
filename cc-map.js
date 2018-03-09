@@ -5,6 +5,10 @@ class CcMap extends HTMLElement {
         this._root = this.attachShadow({ mode: 'open' }); 
         console.log('this._root',this._root);
 
+        // DOM elements
+        this._mapTitle = null;
+        this._mapTitleText = '';
+
         // data
         this._geoData = {
             center:  {
@@ -28,10 +32,12 @@ class CcMap extends HTMLElement {
             width: 100%;
         }
         </style>
+        <h1 id="map-title"></h1>
         <div id="map">
         </div>
         `;
-        this._mapDiv = this._root.getElementById('map');        
+        this._mapDiv = this._root.getElementById('map');  
+        this._mapTitle = this._root.getElementById('map-title');      
         this._render();
     }
 
@@ -42,6 +48,10 @@ class CcMap extends HTMLElement {
         }
        
         this._initMap({ center: this._geoData.center, zoom: 12});
+    }
+
+    _renderTitle() {
+        this._mapTitle.innerText = this._mapTitleText;
     }
 
     _initMap(options) {
@@ -68,6 +78,8 @@ class CcMap extends HTMLElement {
         }
     }
 
+
+
     // getter and setter that will allow to programmatically get and set coords and map title
     set geoData(value) {
         if(this._geoData === value) return;
@@ -79,6 +91,7 @@ class CcMap extends HTMLElement {
         return this._geoData;
     }
 
+    // getter and setter that will allow to programmatically get and set zoom level    
     set zoom(value) {
         if(this._zoom === value) return;
         this._zoom = value;
@@ -89,6 +102,18 @@ class CcMap extends HTMLElement {
     get zoom() {
         return this._zoom;
     }
+
+    // getter and setter that will allow to programmatically get and set map title
+    set mapTitleText(value) {
+        if(this._mapTitleText === value) return;
+        this._mapTitleText = value;
+        this._renderTitle();
+    }
+
+    get mapTitleText() {
+        return this._mapTitleText;
+    }
+    
 
 } // end class
 window.customElements.define('cc-map', CcMap);
