@@ -1,9 +1,11 @@
 class CcMap extends HTMLElement {
     constructor() {
-        super();       
+        super();
         // store shadow root reference in a _root variable
-        this._root = this.attachShadow({ mode: 'open' }); 
-        console.log('this._root',this._root);
+        this._root = this.attachShadow({
+            mode: 'open'
+        });
+        console.log('this._root', this._root);
 
         // DOM elements
         this._mapTitle = null;
@@ -11,7 +13,7 @@ class CcMap extends HTMLElement {
 
         // data
         this._geoData = {
-            center:  {
+            center: {
                 lat: 48.1173,
                 lng: -1.6778
             },
@@ -21,9 +23,14 @@ class CcMap extends HTMLElement {
         this._componentReady = false;
         this._map = null;
         this._zoom = 12;
+        this._mapListensForClick = false;
+        this._iconBaseUrl = 'http://maps.google.com/mapfiles/kml/paddle';
         this._markersPositions = [];
+        this._marker = null;
+        this._markerLat = 0;
+        this._markerLng = 0;
     }
-    
+
     connectedCallback() {
         console.log('cc-map added to the DOM');
         this._componentReady = true;
@@ -38,18 +45,21 @@ class CcMap extends HTMLElement {
         <div id="map">
         </div>
         `;
-        this._mapDiv = this._root.getElementById('map');  
-        this._mapTitle = this._root.getElementById('map-title');      
+        this._mapDiv = this._root.getElementById('map');
+        this._mapTitle = this._root.getElementById('map-title');
         this._render();
     }
 
     _render() {
-        if(!window.google) {
+        if (!window.google) {
             console.log('Google maps NOT ready');
             return;
         }
-       
-        this._initMap({ center: this._geoData.center, zoom: 12});
+
+        this._initMap({
+            center: this._geoData.center,
+            zoom: 12
+        });
     }
 
     _renderTitle() {
@@ -64,18 +74,29 @@ class CcMap extends HTMLElement {
     }
 
     _addMarker(options) {
-        const marker = new window.google.maps.Marker({
+        this._marker = new window.google.maps.Marker({
             position: options.position,
             map: this._map,
-            icon: 'https://maps.gstatic.com/intl/en_ALL/mapfiles/dd-start.png'
+            icon: options.draggable ? `${this._iconBaseUrl}/ylw-stars.png` : `${this._iconBaseUrl}/red-circle.png`,
+            draggable: options.draggable
         });
-        console.log('marker', marker);
 
-        const infoWindow = new window.google.maps.InfoWindow({
+        let infoWindow = new window.google.maps.InfoWindow({
             content: options.content
         });
 
-        marker.addListener('click', () => infoWindow.open(this._map, marker));
+        this._marker.addListener('click', () => infoWindow.open(this._map, this._marker));
+
+        if (options.draggable) {
+            this._marker.addListener('dragend', (event) => {
+                this._markerLat = event.latLng.lat();
+                this._markerLng = event.latLng.lng();
+                console.log(this._markerLat, this._markerLng);
+                infoWindow = new google.maps.InfoWindow({
+                    content: `lat: ${this._markerLat} - lng: ${this._markerLng}`
+                });                
+            });
+        }
     }
 
     static get observedAttributes() {
@@ -83,10 +104,10 @@ class CcMap extends HTMLElement {
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
-        if(!this._componentReady) return;
+        if (!this._componentReady) return;
 
         console.log(`name: ${name} - old value: ${oldValue} - new value: ${newValue}`);
-        if(name === 'zoom') {            
+        if (name === 'zoom') {
             const mapOptions = {
                 zoom: parseInt(newValue),
                 center: this._geoData.center
@@ -95,11 +116,27 @@ class CcMap extends HTMLElement {
         }
     }
 
+    _addMarkerOnMapClick() {
+        window.google.maps.event.addListener(this._map, 'click', (event) => {
+            console.log('map click event', event);
+            const lat = event.latLng.lat();
+            const lng = event.latLng.lng();
+            this._addMarker({
+                position: {
+                    lat: lat,
+                    lng: lng
+                },
+                content: `lat: ${lat} - lng: ${lng}`,
+                draggable: true
+            });
+        });
+    }
+
 
 
     // getter and setter that will allow to programmatically get and set coords and map title
     set geoData(value) {
-        if(this._geoData === value) return;
+        if (this._geoData === value) return;
         this._geoData = value;
         this._initMap(this._geoData);
     }
@@ -110,7 +147,7 @@ class CcMap extends HTMLElement {
 
     // getter and setter that will allow to programmatically get and set zoom level    
     set zoom(value) {
-        if(this._zoom === value) return;
+        if (this._zoom === value) return;
         this._zoom = value;
         this._geoData.zoom = this._zoom;
         this._initMap(this._geoData);
@@ -122,7 +159,7 @@ class CcMap extends HTMLElement {
 
     // getter and setter that will allow to programmatically get and set map title
     set mapTitleText(value) {
-        if(this._mapTitleText === value) return;
+        if (this._mapTitleText === value) return;
         this._mapTitleText = value;
         this._renderTitle();
     }
@@ -139,7 +176,7 @@ class CcMap extends HTMLElement {
 
     get mostRecentMarker() {
         const arrayLength = this._markersPositions.length;
-        if(arrayLength > 0) {
+        if (arrayLength > 0) {
             return this._markersPositions[arrayLength - 1];
         } else {
             return {};
@@ -153,7 +190,17 @@ class CcMap extends HTMLElement {
     get markersPositions() {
         return this._markersPositions;
     }
-    
+
+    set mapListensForClick(value) {
+        this._mapListensForClick = value;
+        if (this._mapListensForClick) {
+            this._addMarkerOnMapClick();
+        }
+    }
+
+    get mapListensForClick() {
+        return this._mapListensForClick;
+    }
 
 } // end class
 window.customElements.define('cc-map', CcMap);
