@@ -19,7 +19,9 @@ class CcMap extends HTMLElement {
             zoom: this._zoom
         };
         this._componentReady = false;
+        this._map = null;
         this._zoom = 12;
+        this._markersPositions = [];
     }
     
     connectedCallback() {
@@ -55,10 +57,25 @@ class CcMap extends HTMLElement {
     }
 
     _initMap(options) {
-        var map = new window.google.maps.Map(this._mapDiv, {
+        this._map = new window.google.maps.Map(this._mapDiv, {
             zoom: options.zoom,
             center: options.center
         });
+    }
+
+    _addMarker(options) {
+        const marker = new window.google.maps.Marker({
+            position: options.position,
+            map: this._map,
+            icon: 'https://maps.gstatic.com/intl/en_ALL/mapfiles/dd-start.png'
+        });
+        console.log('marker', marker);
+
+        const infoWindow = new window.google.maps.InfoWindow({
+            content: options.content
+        });
+
+        marker.addListener('click', () => infoWindow.open(this._map, marker));
     }
 
     static get observedAttributes() {
@@ -112,6 +129,29 @@ class CcMap extends HTMLElement {
 
     get mapTitleText() {
         return this._mapTitleText;
+    }
+
+    set mostRecentMarker(value) {
+        // todo prevent duplicates
+        this._markersPositions = [...this.markersPositions, value];
+        this._addMarker(value);
+    }
+
+    get mostRecentMarker() {
+        const arrayLength = this._markersPositions.length;
+        if(arrayLength > 0) {
+            return this._markersPositions[arrayLength - 1];
+        } else {
+            return {};
+        }
+    }
+
+    set markersPositions(value) {
+        this._addMarker(value);
+    }
+
+    get markersPositions() {
+        return this._markersPositions;
     }
     
 
