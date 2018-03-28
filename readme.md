@@ -27,9 +27,14 @@ myMap.geoData
 ```
 
 
-Ajouter un marker :
+Adding a marker :
 ```
 myMap = document.getElementById('my-map');
 myMap.mostRecentMarker = { position: { lat: 48.1145, lng: -1.6812 }, content: 'Place Sainte Anne', draggable: false};
 myMap.mostRecentMarker = { position: { lat: 48.1128, lng: -1.6781 }, content: 'Parlement de Bretagne', draggable: false};
+```
+
+Allowing to add markers on map click: 
+```
+myMap.mapListensForClick = true;
 ```

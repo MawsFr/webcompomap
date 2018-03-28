@@ -6,13 +6,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
-    <script src="mapsApi.js"></script>    
     <title>A la carte</title>    
     <script src="cc-map.js"></script>
 </head>
 
 <body>
-    <cc-map zoom="12" id="my-map"></cc-map>    
+    <cc-map zoom="12" id="my-map"></cc-map>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAaePC2p9Cnf7cDQLKb4nnpck2onLn0SZk&callback=googleMapsLoaded" async defer></script>
+    <script>
+        function googleMapsLoaded() {
+            // by resolving our promise, googleMapsDownloadPromise.then() inside connectedCallback() of cc-map component will be called
+            window.resolveGoogleMapsLoaded();
+        }
+    </script>
 </body>
 
 </html>

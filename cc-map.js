@@ -20,7 +20,7 @@ class CcMap extends HTMLElement {
             title: 'Rennes',
             zoom: this._zoom
         };
-        this._componentReady = false;
+        this._googleMapsDownloadPromise = new Promise((resolveGoogleMapsLoaded) => window.resolveGoogleMapsLoaded = resolveGoogleMapsLoaded);
         this._map = null;
         this._zoom = 12;
         this._mapListensForClick = false;
@@ -32,47 +32,43 @@ class CcMap extends HTMLElement {
     }
 
     connectedCallback() {
-        console.log('cc-map added to the DOM');
-        this._componentReady = true;
-        this._root.innerHTML = `
-        <style>
-        #map {
-            height: 400px;
-            width: 100%;
-        }
-        </style>
-        <h1 id="map-title"></h1>
-        <div id="map">
-        </div>
-        `;
-        this._mapDiv = this._root.getElementById('map');
-        this._mapTitle = this._root.getElementById('map-title');
-        this._render();
+        console.log('cc-map added to the DOM');        
+
+        this._googleMapsDownloadPromise
+            .then(() => { 
+                this._root.innerHTML = `
+                <style>
+                #map {
+                    height: 400px;
+                    width: 100%;
+                }
+                </style>
+                <h1 id="map-title"></h1>
+                <div id="map">
+                </div>
+                `;
+                this._mapDiv = this._root.getElementById('map');
+                this._mapTitle = this._root.getElementById('map-title');
+        
+                this._initMap({
+                    center: this._geoData.center,
+                    zoom: 12
+                });            
+            })
+            .catch(err => console.error(err));
     }
-
-    _render() {
-        if (!window.google) {
-            console.log('Google maps NOT ready');
-            return;
-        }
-
-        this._initMap({
-            center: this._geoData.center,
-            zoom: 12
-        });
-    }
-
+    
     _renderTitle() {
         this._mapTitle.innerText = this._mapTitleText;
     }
-
+    
     _initMap(options) {
         this._map = new window.google.maps.Map(this._mapDiv, {
             zoom: options.zoom,
             center: options.center
         });
     }
-
+    
     _addMarker(options) {
         this._marker = new window.google.maps.Marker({
             position: options.position,
